@@ -6,25 +6,34 @@ import Header from '../../components/Header';
 import {Container, Body, CarInsert, CarList} from './styles';
 
 interface CarProps {
-  id: string;
+  id_car: string;
   plate: string;
 }
 
 const Dashboad = () => {
   const [carsList, setCarsList] = useState<CarProps[]>([]); 
   const [newCar, setNewCar] = useState<string>('');
-  
+  const date = new Date();
+
   useEffect(() => {
-    api.get('/cars').then(response => {
-      if(response.data.length > 0) {
-        setCarsList(response.data);
+    api.get(`/parking?date=${date.getDay()}-${date.getMonth()}-${date.getFullYear()}`).then(responseParking => {
+
+      if(responseParking.data.length > 0) {        
+
+        if(responseParking.data.length > 0) {
+          api.get(`/car_parking/${responseParking.data[0].id}`).then(response => {
+            if(response.data.length > 0) {
+              setCarsList(response.data);
+            }
+          });
+        }
       }
     });
   }, [carsList]);
 
   const insertNewCar = () => {
     api.post('/cars', {
-      plate: newCar
+      plate: newCar.toUpperCase()
     }).then(response => {
       if(response.data.length > 0) {
         setCarsList(response.data);
@@ -64,10 +73,10 @@ const Dashboad = () => {
               {
                 carsList.map(item => {
                   return (
-                    <tr key={item.id}>
-                      <td>{item.id}</td>
+                    <tr key={item.id_car}>
+                      <td>{item.id_car}</td>
                       <td>{item.plate}</td>
-                      <td><button onClick={() => removeCar(item.id)}>baixa</button></td>
+                      <td><button onClick={() => removeCar(item.id_car)}>baixa</button></td>
                     </tr>
                   );
                 })
