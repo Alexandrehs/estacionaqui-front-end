@@ -31,6 +31,7 @@ export default createGlobalStyle`
 
   html, body, #root {
     background: var(--color-background);
+    height: 100vh;
   }
 
   #root {
@@ -44,5 +45,9 @@ export default createGlobalStyle`
   button,
   textarea {
     font: 500 1.6rem Poppins;
+  }
+
+  a, input, button {
+    cursor: pointer;
   }
 `;
