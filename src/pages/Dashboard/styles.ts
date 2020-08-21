@@ -42,7 +42,7 @@ export const Parking = styled.div`
   align-items: center;
   grid-area: PAR;
   padding: 10px;
-  max-height: 100vh;
+  overflow-y: scroll;
 
   >table {
     width: 100%;

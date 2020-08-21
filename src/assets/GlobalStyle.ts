@@ -31,14 +31,8 @@ export default createGlobalStyle`
 
   html, body, #root {
     background: var(--color-background);
-    
-  }
-
-  #root {
     width: 100vw;
     height: 100vh;
-    display: flex;
-    justify-content: center;
   }
 
   body, 

@@ -1,45 +1,66 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
+
+import api from '../../config/api';
 
 import {Container, NewCarPanel, Parking, Footer, Header} from './styles';
 
-interface Parking {
+interface CarInParking {
 	id: string;
-	placa: string;
-	entrada: string;
+	plate: string;
+	time_in: string;
+	parking_id: string;
 }
 
 const Dashboard = () => {
 	const [car, setCar] = useState<string>('');
-	const [parking, setParking] = useState<Parking[]>([]);
-	const date = new Date();
+	const [carInParking, setCarInParking] = useState<CarInParking[]>([]);
+	const [parking, setParking] = useState<string>('');
+	const date = new Date().toLocaleString('pt-BR', {
+		day: 'numeric',
+		month: 'numeric',
+		year: 'numeric'
+	});
+	
+	useEffect(() => {
+		if(parking === '') {
+			api.get(`/parking?date=${date}`).then(response => {
+				setParking(response.data[0].id);
+
+				if(response.data[0].id) {
+					api.get(`/car_parking/${response.data[0].id}`).then(response => {
+						setCarInParking(response.data);
+					});
+				}
+			});
+		}
+
+		if(parking !== '') {
+			api.get(`/car_parking/${parking}`).then(response => {
+				setCarInParking(response.data);
+			});
+		} 
+	}, [carInParking]);
 
 	const insertCarInParking = () => {
-		if(car !== '') {
-			if(car.length == 7) {
-				setParking([
-					...parking,
-					{
-						id: String(Math.random()),
-						placa: car,
-						entrada: `${date.getDay()}-${date.getMonth()}-${date.getFullYear()}`
-					}
-				]);	
-			}
+		if(car !== '' && car.length === 7) {
+			api.post('/cars', {plate: car}).then(response => {
+
+				setCarInParking([...carInParking, response.data]);
+			});
+			setCar('');
 		}
 	}
 
-	const removeCarInParking = (id: string) => {
-		let newparking = new Array();
-		if(id !== '') {
-			for(var i = 0; i < parking.length; i++) {
-				if(id !== parking[i].id) {
-					newparking.push(
-						parking[i]
-					)
-				}
-			}
+	const removeCarInParking = (parking_id: string) => {
+		if(parking_id !== '') {
+			api.post(`/cars/${parking_id}`).then(response => {
 
-			setParking(newparking);
+				if(response.data) {
+					api.get(`/car_parking/${parking}`).then(response => {
+						setCarInParking(response.data);
+					});
+				}
+			});
 		}
 	}
 
@@ -63,7 +84,7 @@ const Dashboard = () => {
 				<table>
 					<thead>
 						<tr>
-							<th>id</th>
+							<th>code</th>
 							<th>placa</th>
 							<th>entrada</th>
 							<th></th>
@@ -72,13 +93,13 @@ const Dashboard = () => {
 
 					<tbody>
 						{
-							parking.map(item => {
+							carInParking.map(item => {
 								return (
 									<tr key={item.id}>
-										<td>{item.id}</td>
-										<td>{item.placa}</td>
-										<td>{item.entrada}</td>
-										<td><button onClick={() => removeCarInParking(item.id)}>remover</button></td>
+										<td>{item.parking_id}</td>
+										<td>{item.plate}</td>
+										<td>{item.time_in}</td>
+										<td><button onClick={() => removeCarInParking(item.parking_id)}>remover</button></td>
 									</tr>
 								);
 							})
@@ -88,6 +109,7 @@ const Dashboard = () => {
 			</Parking>
 
 			<Footer>
+					<strong>create - {parking}</strong>
 				<span>feito por <i>Alexandre</i> em 2020.</span>
 			</Footer>
 		</Container>	
