@@ -2,10 +2,10 @@ import styled from 'styled-components';
 
 export const Container = styled.div`
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 150px 1fr 200px;
   grid-template-rows: 20vh 70vh 10vh;
   grid-template-areas: "header header header"
-                        "NCP PAR PAR"
+                        "NCP PAR STS"
                         "footer footer footer";
 
   background: var(--color-line-in-white);
@@ -14,8 +14,9 @@ export const Container = styled.div`
 `;
 
 export const Header = styled.div`
+  grid-area: header;
   display: flex;
-  justify-content: space-around;
+  justify-content: flex-start;
   align-items: center; 
 `;
 
@@ -54,13 +55,27 @@ export const Parking = styled.div`
   }
 
   table > tbody > tr {
-    border-bottom: 1px solid var(--color-text-base);
+    
+    margin-top: 10px;
 
     >td, th {
       text-align: center;
       align-items: center;
+      border-bottom: 1px solid var(--color-text-base);
+      height: 30px;
     }
   }
+`;
+
+export const Status = styled.div`
+  grid-area: STS;
+  display: flex;
+  flex-direction: column;
+`;
+
+export const Divider = styled.div`
+  width: 70%;
+  height: 1px;
 `;
 
 export const Footer = styled.div`

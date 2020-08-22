@@ -2,7 +2,14 @@ import React, {useState, useEffect} from 'react';
 
 import api from '../../config/api';
 
-import {Container, NewCarPanel, Parking, Footer, Header} from './styles';
+import {
+	Container, 
+	NewCarPanel, 
+	Parking, Status, 
+	Footer, 
+	Header,
+	Divider
+} from './styles';
 
 interface CarInParking {
 	id: string;
@@ -11,10 +18,18 @@ interface CarInParking {
 	parking_id: string;
 }
 
+interface Car {
+	id: string;
+	plate: string;
+	time_in: string;
+	valueNow: string;
+}
+
 const Dashboard = () => {
 	const [car, setCar] = useState<string>('');
 	const [carInParking, setCarInParking] = useState<CarInParking[]>([]);
 	const [parking, setParking] = useState<string>('');
+	const [carStatus, setCarStatus] = useState<Car[]>([]);
 	const date = new Date().toLocaleString('pt-BR', {
 		day: 'numeric',
 		month: 'numeric',
@@ -51,6 +66,24 @@ const Dashboard = () => {
 		}
 	}
 
+	const statusCarInParking = (idCar: string) => {
+		if(idCar) {
+			const hourNow = new Date().toLocaleTimeString('pt-BR');
+
+			carInParking.map(item => {
+				if(item.id === idCar) {
+					const timeInParking = Math.abs(hourNow - item.time_in);
+					setCarStatus([{
+						id: item.parking_id,
+						plate: item.plate,
+						time_in: item.time_in,
+						valueNow: timeInParking
+					}]);
+				}
+			})
+		}
+	}
+
 	const removeCarInParking = (parking_id: string) => {
 		if(parking_id !== '') {
 			api.post(`/cars/${parking_id}`).then(response => {
@@ -61,6 +94,8 @@ const Dashboard = () => {
 					});
 				}
 			});
+
+			setCarStatus([]);
 		}
 	}
 
@@ -73,7 +108,7 @@ const Dashboard = () => {
 				<h3>Adicionar</h3>
 				<input 
 					type="text" 
-					placeholder="digite a placa"
+					placeholder="placa"
 					value={car}
 					onChange={e => setCar(e.target.value)}
 				/>
@@ -87,7 +122,6 @@ const Dashboard = () => {
 							<th>code</th>
 							<th>placa</th>
 							<th>entrada</th>
-							<th></th>
 						</tr>
 					</thead>
 
@@ -95,11 +129,10 @@ const Dashboard = () => {
 						{
 							carInParking.map(item => {
 								return (
-									<tr key={item.id}>
+									<tr key={item.id} onClick={() => statusCarInParking(item.parking_id)}>
 										<td>{item.parking_id}</td>
 										<td>{item.plate}</td>
 										<td>{item.time_in}</td>
-										<td><button onClick={() => removeCarInParking(item.parking_id)}>remover</button></td>
 									</tr>
 								);
 							})
@@ -107,6 +140,21 @@ const Dashboard = () => {
 					</tbody>
 				</table>
 			</Parking>
+
+			<Status>
+				{
+					carStatus.map(item => {
+						return (
+							<>
+								<span>Placa -- <strong>{item.plate}</strong></span>
+								<span>Entrada -- <strong>{item.time_in}</strong></span>
+								<span>Valor Atual -- <strong>{item.valueNow}</strong></span>
+								<button onClick={() => removeCarInParking(item.id)}>Baixa</button>
+							</>
+						);
+					})
+				}
+			</Status>
 
 			<Footer>
 					<strong>create - {parking}</strong>
